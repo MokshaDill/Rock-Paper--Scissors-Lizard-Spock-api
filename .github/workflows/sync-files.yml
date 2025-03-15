@@ -3,24 +3,21 @@ name: Sync Specific Files from Main Repo
 on:
   push:
     branches:
-      - main  # This runs the action when changes are pushed to the main branch of the new repo
+      - main  # Trigger when changes are pushed to the 'main' branch of the new repo
   schedule:
-    - cron: '0 * * * *'  # This runs the action every hour (you can adjust as needed)
+    - cron: '0 * * * *'  # Runs every hour, adjust as necessary
 
 jobs:
   sync-files:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Main Repo
+      - name: Checkout Main Repo (Private)
         uses: actions/checkout@v3
         with:
-          repository: MokshaDill/Rock-Paper--Scissors-Lizard-Spock
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create Necessary Directories in New Repo
-        run: |
-          mkdir -p Rock-Paper--Scissors-Lizard-Spock-api/artifacts/models
-          mkdir -p Rock-Paper--Scissors-Lizard-Spock-api/other/necessary/directories
+          repository: MokshaDill/Rock-Paper--Scissors-Lizard-Spock  # Main repo (private)
+          ref: master  # Checkout from 'master' branch of the main repo
+          token: ${{ secrets.MAIN_REPO_TOKEN }}  # Use the PAT secret for authentication
 
       - name: Copy Specific Files from Main Repo to New Repo
         run: |

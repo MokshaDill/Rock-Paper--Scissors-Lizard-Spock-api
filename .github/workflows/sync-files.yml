@@ -21,8 +21,8 @@ jobs:
       uses: actions/checkout@v3
       with:
         repository: MokshaDill/Rock-Paper--Scissors-Lizard-Spock  # Replace with the correct main repo name
-        token: ${{ secrets.GH_TOKEN }}  # Using the secret token to access the private repository
-        ref: master  # Ensure this is the correct branch name (e.g., "main" or "master")
+        token: ${{ secrets.MAIN_REPO_TOKEN }}  # Reference the secret token here
+        ref: master  # Make sure the branch name is correct (use "main" if that's the branch name)
 
     # Sync specific files from the main repo to the new repo
     - name: Sync Files from Main Repo to New Repo

@@ -19,15 +19,15 @@ jobs:
           ref: master  # Checkout from 'master' branch of the main repo
           token: ${{ secrets.MAIN_REPO_TOKEN }}  # Use the PAT secret for authentication
 
-      - name: List contents of the current directory (Debugging)
-        run: |
-          echo "Listing contents of the current directory:"
-          ls -R
-
-      - name: List contents of the main repo directory
+      - name: List contents of the main repo directory (Debugging)
         run: |
           echo "Listing contents of the main repo directory:"
-          ls -R ${{ github.workspace }}
+          ls -R ${{ github.workspace }}  # Check the root and subdirectories
+
+      - name: List contents of the artifacts directory (Debugging)
+        run: |
+          echo "Listing contents of the artifacts directory:"
+          ls -R ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/artifacts/  # Check specifically inside 'artifacts/'
 
       - name: Create target directories if they don't exist
         run: |
@@ -36,10 +36,24 @@ jobs:
 
       - name: Copy Specific Files from Main Repo to New Repo
         run: |
-          # Correcting the rsync paths using the workspace path
-          rsync -avz --progress ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/artifacts/models/model.h5 ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock-api/artifacts/models/
-          rsync -avz --progress ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/main.py ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock-api/
-          rsync -avz --progress ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/requirements.txt ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock-api/
+          # Check and sync files if the directories exist
+          if [ -d "${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/artifacts/models" ]; then
+            rsync -avz --progress ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/artifacts/models/model.h5 ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock-api/artifacts/models/
+          else
+            echo "Directory 'models' not found in main repo"
+          fi
+
+          if [ -f "${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/main.py" ]; then
+            rsync -avz --progress ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/main.py ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock-api/
+          else
+            echo "main.py not found in the main repo"
+          fi
+
+          if [ -f "${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/requirements.txt" ]; then
+            rsync -avz --progress ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/requirements.txt ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock-api/
+          else
+            echo "requirements.txt not found in the main repo"
+          fi
 
       - name: Commit and Push Changes to New Repo
         run: |

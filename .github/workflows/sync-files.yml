@@ -14,25 +14,28 @@ jobs:
     - name: Checkout New Repo
       uses: actions/checkout@v3
       with:
-        repository: MokshaDill/Rock-Paper--Scissors-Lizard-Spock-api  # Replace with the new repo's name if needed
+        repository: MokshaDill/Rock-Paper--Scissors-Lizard-Spock-api
+        token: ${{ secrets.MAIN_REPO_TOKEN}}  # Use the fine-grained token
 
-    # Checkout the Main Repo (Private Repo) using Personal Access Token (PAT)
+    # Checkout the Main Repo (Private Repo)
     - name: Checkout Main Repo
       uses: actions/checkout@v3
       with:
-        repository: MokshaDill/Rock-Paper--Scissors-Lizard-Spock  # Replace with the correct main repo name
-        token: ${{ secrets.MAIN_REPO_TOKEN }}  # Reference the secret token here
-        ref: master  # Make sure the branch name is correct (use "main" if that's the branch name)
+        repository: MokshaDill/Rock-Paper--Scissors-Lizard-Spock
+        token: ${{ secrets.GH_TOKEN }}  # Reference the fine-grained token
+        ref: master  # Adjust the branch name if needed
+
+    # Create the 'models' directory if it doesn't exist
+    - name: Create models directory
+      run: |
+        mkdir -p /home/runner/work/Rock-Paper--Scissors-Lizard-Spock-api/Rock-Paper--Scissors-Lizard-Spock-api/Rock-Paper--Scissors-Lizard-Spock/artifacts/models
 
     # Sync specific files from the main repo to the new repo
     - name: Sync Files from Main Repo to New Repo
       run: |
-        echo "Syncing the specific files..."
-        # Make sure the target directories exist before syncing
-        mkdir -p /home/runner/work/Rock-Paper--Scissors-Lizard-Spock-api/Rock-Paper--Scissors-Lizard-Spock-api/artifacts/models
-        rsync -avz --progress /home/runner/work/Rock-Paper--Scissors-Lizard-Spock-api/Rock-Paper--Scissors-Lizard-Spock-api/Rock-Paper--Scissors-Lizard-Spock/artifacts/models/model.h5 Rock-Paper--Scissors-Lizard-Spock-api/artifacts/models/
-        rsync -avz --progress /home/runner/work/Rock-Paper--Scissors-Lizard-Spock-api/Rock-Paper--Scissors-Lizard-Spock-api/Rock-Paper--Scissors-Lizard-Spock/main.py Rock-Paper--Scissors-Lizard-Spock-api/
-        rsync -avz --progress /home/runner/work/Rock-Paper--Scissors-Lizard-Spock-api/Rock-Paper--Scissors-Lizard-Spock-api/Rock-Paper--Scissors-Lizard-Spock/requirements.txt Rock-Paper--Scissors-Lizard-Spock-api/
+        rsync -avz --progress /home/runner/work/Rock-Paper--Scissors-Lizard-Spock-api/Rock-Paper--Scissors-Lizard-Spock-api/Rock-Paper--Scissors-Lizard-Spock/artifacts/models/model.h5 /home/runner/work/Rock-Paper--Scissors-Lizard-Spock-api/Rock-Paper--Scissors-Lizard-Spock-api/artifacts/models/
+        rsync -avz --progress /home/runner/work/Rock-Paper--Scissors-Lizard-Spock-api/Rock-Paper--Scissors-Lizard-Spock-api/Rock-Paper--Scissors-Lizard-Spock/main.py /home/runner/work/Rock-Paper--Scissors-Lizard-Spock-api/Rock-Paper--Scissors-Lizard-Spock-api/
+        rsync -avz --progress /home/runner/work/Rock-Paper--Scissors-Lizard-Spock-api/Rock-Paper--Scissors-Lizard-Spock-api/Rock-Paper--Scissors-Lizard-Spock/requirements.txt /home/runner/work/Rock-Paper--Scissors-Lizard-Spock-api/Rock-Paper--Scissors-Lizard-Spock-api/
 
     # Commit and push the changes to the new repo
     - name: Commit Changes

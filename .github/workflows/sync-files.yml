@@ -19,6 +19,11 @@ jobs:
           ref: master  # Checkout from 'master' branch of the main repo
           token: ${{ secrets.MAIN_REPO_TOKEN }}  # Use the PAT secret for authentication
 
+      - name: List contents of main repo to verify files
+        run: |
+          # Check if the target files and directories exist
+          ls -R Rock-Paper--Scissors-Lizard-Spock
+          
       - name: Create target directories if they don't exist
         run: |
           mkdir -p Rock-Paper--Scissors-Lizard-Spock-api/artifacts/models

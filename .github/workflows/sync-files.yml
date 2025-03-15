@@ -21,23 +21,25 @@ jobs:
 
       - name: List contents of the current directory (Debugging)
         run: |
+          echo "Listing contents of the current directory:"
           ls -R
 
       - name: List contents of the main repo directory
         run: |
+          echo "Listing contents of the main repo directory:"
           ls -R ${{ github.workspace }}
 
       - name: Create target directories if they don't exist
         run: |
-          mkdir -p Rock-Paper--Scissors-Lizard-Spock-api/artifacts/models
-          mkdir -p Rock-Paper--Scissors-Lizard-Spock-api
+          mkdir -p ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock-api/artifacts/models
+          mkdir -p ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock-api
 
       - name: Copy Specific Files from Main Repo to New Repo
         run: |
-          # Sync the specific files from the main repo to the new repo
-          rsync -avz --progress ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/artifacts/models/model.h5 Rock-Paper--Scissors-Lizard-Spock-api/artifacts/models/
-          rsync -avz --progress ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/main.py Rock-Paper--Scissors-Lizard-Spock-api/
-          rsync -avz --progress ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/requirements.txt Rock-Paper--Scissors-Lizard-Spock-api/
+          # Correcting the rsync paths using the workspace path
+          rsync -avz --progress ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/artifacts/models/model.h5 ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock-api/artifacts/models/
+          rsync -avz --progress ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/main.py ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock-api/
+          rsync -avz --progress ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/requirements.txt ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock-api/
 
       - name: Commit and Push Changes to New Repo
         run: |

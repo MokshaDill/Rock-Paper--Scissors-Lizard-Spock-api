@@ -1,48 +1,44 @@
-name: Sync Specific Files from Main Repo
+name: Sync Files from Main Repo to New Repo
 
 on:
   push:
     branches:
-      - main  # This runs the action when changes are pushed to the main branch of the new repo
-  schedule:
-    - cron: '0 * * * *'  # This runs the action every hour (you can adjust as needed)
+      - main
 
 jobs:
-  sync-files:
+  sync-repos:
     runs-on: ubuntu-latest
+
     steps:
-      # Step 1: Checkout the main repo (private repo)
-      - name: Checkout Main Repo
-        uses: actions/checkout@v3
-        with:
-          repository: MokshaDill/Rock-Paper--Scissors-Lizard-Spock
-          token: ${{ secrets.GITHUB_TOKEN }}
-          ref: master  # Make sure you are checking out the correct branch (master in your case)
+    # Checkout the current repository (New Repo)
+    - name: Checkout New Repo
+      uses: actions/checkout@v3
+      with:
+        repository: MokshaDill/Rock-Paper--Scissors-Lizard-Spock-api  # Replace with the new repo's name if needed
 
-      # Step 2: Debugging step - List the full directory structure of the main repo to find the correct paths
-      - name: List the full directory structure of the main repo
-        run: |
-          echo "Listing the entire directory structure:"
-          ls -R ${{ github.workspace }}  # List the full directory structure for easier inspection
+    # Checkout the Main Repo (Private Repo) using Personal Access Token (PAT)
+    - name: Checkout Main Repo
+      uses: actions/checkout@v3
+      with:
+        repository: MokshaDill/Rock-Paper--Scissors-Lizard-Spock  # Replace with the correct main repo name
+        token: ${{ secrets.GH_TOKEN }}  # Replace this with your secret token
+        ref: master  # Make sure the branch name is correct (use "main" if that's the branch name)
 
-      # Step 3: Sync the specific files from the main repo to the new repo
-      - name: Sync specific files from Main Repo to New Repo
-        run: |
-          # Check the directory structure to confirm paths before syncing
-          echo "Listing contents of the main repo:"
-          ls -R ${{ github.workspace }}  # Confirm directory contents
+    # Sync specific files from the main repo to the new repo
+    - name: Sync Files from Main Repo to New Repo
+      run: |
+        echo "Syncing the specific files..."
+        # Make sure the target directories exist before syncing
+        mkdir -p /home/runner/work/Rock-Paper--Scissors-Lizard-Spock-api/Rock-Paper--Scissors-Lizard-Spock-api/artifacts/models
+        rsync -avz --progress /home/runner/work/Rock-Paper--Scissors-Lizard-Spock-api/Rock-Paper--Scissors-Lizard-Spock-api/Rock-Paper--Scissors-Lizard-Spock/artifacts/models/model.h5 Rock-Paper--Scissors-Lizard-Spock-api/artifacts/models/
+        rsync -avz --progress /home/runner/work/Rock-Paper--Scissors-Lizard-Spock-api/Rock-Paper--Scissors-Lizard-Spock-api/Rock-Paper--Scissors-Lizard-Spock/main.py Rock-Paper--Scissors-Lizard-Spock-api/
+        rsync -avz --progress /home/runner/work/Rock-Paper--Scissors-Lizard-Spock-api/Rock-Paper--Scissors-Lizard-Spock-api/Rock-Paper--Scissors-Lizard-Spock/requirements.txt Rock-Paper--Scissors-Lizard-Spock-api/
 
-          # If the 'artifacts' folder exists, this step will run successfully
-          # Sync the specific files from the main repo to the new repo (adjust paths as necessary)
-          rsync -avz --progress "${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/artifacts/models/model.h5" "${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock-api/artifacts/models/" || echo "model.h5 not found"
-          rsync -avz --progress "${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/main.py" "${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock-api/" || echo "main.py not found"
-          rsync -avz --progress "${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/requirements.txt" "${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock-api/" || echo "requirements.txt not found"
-
-      # Step 4: Commit and Push Changes to the New Repo
-      - name: Commit and Push Changes to New Repo
-        run: |
-          git config --global user.name "GitHub Action"
-          git config --global user.email "github-actions@github.com"
-          git add .
-          git commit -m "Synced specific files from main repo" || echo "No changes to commit"
-          git push
+    # Commit and push the changes to the new repo
+    - name: Commit Changes
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git add .
+        git commit -m "Sync specific files from the main repo"
+        git push

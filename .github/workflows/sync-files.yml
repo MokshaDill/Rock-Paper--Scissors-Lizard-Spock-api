@@ -1,0 +1,33 @@
+name: Sync Specific Files from Main Repo
+
+on:
+  push:
+    branches:
+      - main  # This runs the action when changes are pushed to the main branch of the new repo
+  schedule:
+    - cron: '0 * * * *'  # This runs the action every hour (you can adjust as needed)
+
+jobs:
+  sync-files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Main Repo
+        uses: actions/checkout@v3
+        with:
+          repository: MokshaDill/Rock-Paper--Scissors-Lizard-Spock
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Copy Specific Files from Main Repo to New Repo
+        run: |
+          # Sync the specific files from the main repo to the new repo
+          rsync -avz --progress Rock-Paper--Scissors-Lizard-Spock/artifacts/models/model.h5 Rock-Paper--Scissors-Lizard-Spock-api/artifacts/models/
+          rsync -avz --progress Rock-Paper--Scissors-Lizard-Spock/main.py Rock-Paper--Scissors-Lizard-Spock-api/
+          rsync -avz --progress Rock-Paper--Scissors-Lizard-Spock/requirements.txt Rock-Paper--Scissors-Lizard-Spock-api/
+
+      - name: Commit and Push Changes to New Repo
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "github-actions@github.com"
+          git add .
+          git commit -m "Synced specific files from main repo" || echo "No changes to commit"
+          git push

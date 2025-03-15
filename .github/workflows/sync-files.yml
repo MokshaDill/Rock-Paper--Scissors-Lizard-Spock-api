@@ -3,58 +3,42 @@ name: Sync Specific Files from Main Repo
 on:
   push:
     branches:
-      - main  # Trigger when changes are pushed to the 'main' branch of the new repo
+      - main  # This runs the action when changes are pushed to the main branch of the new repo
   schedule:
-    - cron: '0 * * * *'  # Runs every hour, adjust as necessary
+    - cron: '0 * * * *'  # This runs the action every hour (you can adjust as needed)
 
 jobs:
   sync-files:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Main Repo (Private)
+      # Step 1: Checkout the main repo (private repo)
+      - name: Checkout Main Repo
         uses: actions/checkout@v3
         with:
-          repository: MokshaDill/Rock-Paper--Scissors-Lizard-Spock  # Main repo (private)
-          ref: master  # Checkout from 'master' branch of the main repo
-          token: ${{ secrets.MAIN_REPO_TOKEN }}  # Use the PAT secret for authentication
+          repository: MokshaDill/Rock-Paper--Scissors-Lizard-Spock
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: master  # Make sure you are checking out the correct branch (master in your case)
 
-      - name: List contents of the main repo directory (Debugging)
+      # Step 2: Debugging step - List the full directory structure of the main repo to find the correct paths
+      - name: List the full directory structure of the main repo
         run: |
-          echo "Listing contents of the main repo directory:"
-          ls -R ${{ github.workspace }}  # Check the root and subdirectories
+          echo "Listing the entire directory structure:"
+          ls -R ${{ github.workspace }}  # List the full directory structure for easier inspection
 
-      - name: List contents of the artifacts directory (Debugging)
+      # Step 3: Sync the specific files from the main repo to the new repo
+      - name: Sync specific files from Main Repo to New Repo
         run: |
-          echo "Listing contents of the artifacts directory:"
-          ls -R ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/artifacts/  # Check specifically inside 'artifacts/'
+          # Check the directory structure to confirm paths before syncing
+          echo "Listing contents of the main repo:"
+          ls -R ${{ github.workspace }}  # Confirm directory contents
 
-      - name: Create target directories if they don't exist
-        run: |
-          mkdir -p ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock-api/artifacts/models
-          mkdir -p ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock-api
+          # If the 'artifacts' folder exists, this step will run successfully
+          # Sync the specific files from the main repo to the new repo (adjust paths as necessary)
+          rsync -avz --progress "${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/artifacts/models/model.h5" "${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock-api/artifacts/models/" || echo "model.h5 not found"
+          rsync -avz --progress "${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/main.py" "${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock-api/" || echo "main.py not found"
+          rsync -avz --progress "${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/requirements.txt" "${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock-api/" || echo "requirements.txt not found"
 
-      - name: Copy Specific Files from Main Repo to New Repo
-        run: |
-          # Check and sync files if the directories exist
-          if [ -d "${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/artifacts/models" ]; then
-            rsync -avz --progress ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/artifacts/models/model.h5 ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock-api/artifacts/models/
-          else
-            echo "Directory 'models' not found in main repo"
-          fi
-
-          if [ -f "${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/main.py" ]; then
-            rsync -avz --progress ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/main.py ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock-api/
-          else
-            echo "main.py not found in the main repo"
-          fi
-
-          if [ -f "${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/requirements.txt" ]; then
-            rsync -avz --progress ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/requirements.txt ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock-api/
-          else
-            echo "requirements.txt not found in the main repo"
-          fi
-
+      # Step 4: Commit and Push Changes to the New Repo
       - name: Commit and Push Changes to New Repo
         run: |
           git config --global user.name "GitHub Action"

@@ -19,11 +19,14 @@ jobs:
           ref: master  # Checkout from 'master' branch of the main repo
           token: ${{ secrets.MAIN_REPO_TOKEN }}  # Use the PAT secret for authentication
 
-      - name: List contents of main repo to verify files
+      - name: List contents of the current directory (Debugging)
         run: |
-          # Check if the target files and directories exist
-          ls -R Rock-Paper--Scissors-Lizard-Spock
-          
+          ls -R
+
+      - name: List contents of the main repo directory
+        run: |
+          ls -R ${{ github.workspace }}
+
       - name: Create target directories if they don't exist
         run: |
           mkdir -p Rock-Paper--Scissors-Lizard-Spock-api/artifacts/models
@@ -32,9 +35,9 @@ jobs:
       - name: Copy Specific Files from Main Repo to New Repo
         run: |
           # Sync the specific files from the main repo to the new repo
-          rsync -avz --progress Rock-Paper--Scissors-Lizard-Spock/artifacts/models/model.h5 Rock-Paper--Scissors-Lizard-Spock-api/artifacts/models/
-          rsync -avz --progress Rock-Paper--Scissors-Lizard-Spock/main.py Rock-Paper--Scissors-Lizard-Spock-api/
-          rsync -avz --progress Rock-Paper--Scissors-Lizard-Spock/requirements.txt Rock-Paper--Scissors-Lizard-Spock-api/
+          rsync -avz --progress ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/artifacts/models/model.h5 Rock-Paper--Scissors-Lizard-Spock-api/artifacts/models/
+          rsync -avz --progress ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/main.py Rock-Paper--Scissors-Lizard-Spock-api/
+          rsync -avz --progress ${{ github.workspace }}/Rock-Paper--Scissors-Lizard-Spock/requirements.txt Rock-Paper--Scissors-Lizard-Spock-api/
 
       - name: Commit and Push Changes to New Repo
         run: |
